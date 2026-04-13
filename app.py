@@ -10,16 +10,17 @@ def main(page: ft.Page):
     page.title = "Pomodoro"
     page.window_width = 300
     page.window_height = 400
-    # page.vertical_alignment = ft.MainAxisAlignment.CENTER
-    # page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.padding = 0
     page.spacing = 0
-    # page.bgcolor = "#112D4E"
+    page.fonts = {
+        "Roboto": "assets/fonts/Roboto-Regular.ttf",
+    }
 
 
     # Inicialización de variables para el temporizador
-    WORK_TIME = 6 #25 * 60
-    BREAK_TIME = 6 #5 * 60
+    WORK_TIME = 5 #25 * 60
+    BREAK_TIME = 5 #5 * 60
+    TEXT_STYLE = ft.TextStyle(font_family="Roboto")
     is_running = False
     is_work = True
     remaining_time = WORK_TIME
@@ -31,7 +32,7 @@ def main(page: ft.Page):
         import random
         from pathlib import Path
 
-        audio_folder = Path("audio") / folder
+        audio_folder = Path("assets/audio") / folder
         files = list(audio_folder.glob("*.mp3"))
 
         return str(random.choice(files))
@@ -132,7 +133,7 @@ def main(page: ft.Page):
         value="25:00",
         size=60,
         color="#F9F7F7",
-        font_family="Times New Roman"
+        font_family="Roboto",
     )
 
 
@@ -140,7 +141,7 @@ def main(page: ft.Page):
         value="WORK",
         size=40,
         color="#F9F7F7",
-        font_family="Times New Roman"
+        font_family="Roboto",
     )
 
 
@@ -155,7 +156,7 @@ def main(page: ft.Page):
         style=ft.ButtonStyle(
             bgcolor = "#DBE2EF",   #button color
             color = "#3F72AF",      #text color
-            text_style=ft.TextStyle(font_family="Times New Roman"),
+            text_style=TEXT_STYLE,
             padding=20
         )
     )
@@ -167,7 +168,7 @@ def main(page: ft.Page):
         style=ft.ButtonStyle(
             bgcolor = "#DBE2EF",   #button color
             color = "#3F72AF"  ,    #text color
-            text_style=ft.TextStyle(font_family="Times New Roman")
+            text_style=TEXT_STYLE
         )
     )
 
@@ -178,20 +179,19 @@ def main(page: ft.Page):
         animate=ft.Animation(500, "easeInOut"),
         padding=0,
         margin=0,
+        content = ft.Column([
+                status_text,
+                timer_text,
+                ft.Row(
+                    [control_btn, reset_btn],
+                    alignment=ft.MainAxisAlignment.CENTER
+                )
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER
+        )
     )
 
-
-    bg.content = ft.Column([
-            status_text,
-            timer_text,
-            ft.Row(
-                [control_btn, reset_btn],
-                alignment=ft.MainAxisAlignment.CENTER
-            )
-        ],
-        alignment=ft.MainAxisAlignment.CENTER,
-        horizontal_alignment=ft.CrossAxisAlignment.CENTER
-    )
 
     page.add(bg)
 
