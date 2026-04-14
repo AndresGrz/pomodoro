@@ -11,7 +11,7 @@ def main(page: ft.Page):
 
     # 2. Window / app config
     page.title = "Pomodoro"
-    page.window.icon = "assets/icons/yoyo.png"
+    page.window.icon = "icons/yoyo.png"
 
     # 3. Layout config
     page.padding = 0
