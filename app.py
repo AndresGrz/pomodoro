@@ -12,7 +12,6 @@ def main(page: ft.Page):
     page.spacing = 0
     page.fonts = {
         "Roboto": "assets/fonts/Roboto-Regular.ttf",
-        "Audiowide": "assets/fonts/Audiowide-Regular.ttf",
         "Oi": "assets/fonts/Oi-Regular.ttf",
         "Quantico": "assets/fonts/Quantico-Regular.ttf"
     }
