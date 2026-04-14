@@ -18,8 +18,8 @@ def main(page: ft.Page):
 
 
     # Inicialización de variables para el temporizador
-    WORK_TIME = 10 # 25 * 60
-    BREAK_TIME = 10 # 5 * 60
+    WORK_TIME = 25 * 60
+    BREAK_TIME = 5 * 60
     is_running = False
     is_work = True
     remaining_time = WORK_TIME
@@ -43,6 +43,35 @@ def main(page: ft.Page):
         pygame.mixer.music.play()
 
 
+    # Funcion para mover tiempo
+    def modify_clock(e):
+        nonlocal remaining_time, BREAK_TIME, WORK_TIME
+
+        if is_running:
+            return
+        elif not is_running:
+            if e.control.data == "minutes_up":
+                remaining_time += 60
+
+            elif e.control.data == "minutes_down":
+                if remaining_time >= 60:
+                    remaining_time -= 60
+
+            elif e.control.data == "seconds_up":
+                remaining_time += 1
+
+            elif e.control.data == "seconds_down":
+                if remaining_time >= 1:
+                    remaining_time -= 1
+
+        if is_work:
+            WORK_TIME = remaining_time
+        else:
+            BREAK_TIME = remaining_time
+
+        update_ui()
+
+
     # Función para formatear el tiempo en minutos y segundos
     def format_time(seconds):
         mins = seconds // 60
@@ -55,27 +84,58 @@ def main(page: ft.Page):
         timer_text.content.value = format_time(remaining_time)
 
         if is_work:
-            status_text.content.value = "WORK"
+            status_btn.content.content.value = "WORK"
             bg.bgcolor = "#112D4E"
 
         else:
-            status_text.content.value = "BREAK"
+            status_btn.content.content.value = "BREAK"
             bg.bgcolor = "#3F72AF"
 
         page.update()
 
 
+    # Funcion para cambiar entre modo trabajo y descanso
+    def toggle_mode(e):
+        nonlocal is_work, is_running, remaining_time
+
+        if is_running:
+            return
+
+        is_work = not is_work
+
+        if is_work:
+            remaining_time = WORK_TIME
+            status_btn.content.content.value = "WORK"
+        else:
+            remaining_time = BREAK_TIME
+            status_btn.content.content.value = "BREAK"
+
+        update_ui()
+
+
     # Funcion para el boton de reset
     async def reset_timer(e):
-
         play(random_audio("other buttons"))
 
         nonlocal is_running, remaining_time, is_work, timer_task
+        
         is_running = False
+
         if timer_task:
             timer_task.cancel()
-        is_work = True
-        remaining_time = WORK_TIME
+
+        if is_work:
+            remaining_time = WORK_TIME
+        else:
+            remaining_time = BREAK_TIME
+
+        up_btn_minutes.opacity = 1
+        down_btn_minutes.opacity = 1
+        up_btn_seconds.opacity = 1
+        down_btn_seconds.opacity = 1
+
+        control_btn.content.value = "Start"
+
         update_ui()
 
     
@@ -85,20 +145,34 @@ def main(page: ft.Page):
 
         # ▶️ START
         if not is_running:
+            up_btn_minutes.opacity = 0
+            down_btn_minutes.opacity = 0
+            up_btn_seconds.opacity = 0
+            down_btn_seconds.opacity = 0
+
             play(random_audio("start button"))
+
             is_running = True
             timer_task = asyncio.create_task(run_timer())
             control_btn.content.value = "Pause"
+            
 
         # ⏸️ PAUSE
         else:
+            up_btn_minutes.opacity = 1
+            down_btn_minutes.opacity = 1
+            up_btn_seconds.opacity = 1
+            down_btn_seconds.opacity = 1
+
             play(random_audio("other buttons"))
+
             is_running = False
             if timer_task:
                 timer_task.cancel()
+
             control_btn.content.value = "Start"
-        
-        control_btn.update()
+            
+        update_ui()
 
 
     # Función principal del temporizador que se ejecuta en un bucle asincrónico
@@ -138,18 +212,25 @@ def main(page: ft.Page):
     )
 
 
-    status_text = ft.Container(
-        content=ft.Text(
-            value="WORK",
-            size=60,
-            color="#F9F7F7",
-            font_family="Oi",  
+    # Botones
+    status_btn = ft.Container(
+        content=ft.TextButton(
+            content=ft.Text(
+                value="WORK",
+                size=60,
+                color="#F9F7F7",
+                font_family="Oi",
+            ),
+            on_click=toggle_mode,
+            style=ft.ButtonStyle(
+                padding=0,  # 👈
+                overlay_color="transparent"
+            )
         ),
         padding=ft.Padding.symmetric(vertical=20)
     )
-    
 
-    # Botones
+
     control_btn = ft.Button(
         content=ft.Text(
             "Start",
@@ -180,41 +261,49 @@ def main(page: ft.Page):
 
     up_btn_minutes = ft.IconButton(
         icon=ft.Icons.KEYBOARD_ARROW_UP_ROUNDED,
+        data="minutes_up",
         icon_size=16,
         padding=-5,
         style=ft.ButtonStyle(            
             color = "#DBE2EF"  ,    #text color
-        )
+        ),
+        on_click=modify_clock
     )
 
 
     down_btn_minutes = ft.IconButton(
         icon=ft.Icons.KEYBOARD_ARROW_DOWN_ROUNDED,
+        data="minutes_down",
         icon_size=16,
         padding=-5,
         style=ft.ButtonStyle(
             color = "#DBE2EF"  ,    #text color
-        )
+        ),
+        on_click=modify_clock
     )
 
 
     up_btn_seconds = ft.IconButton(
         icon=ft.Icons.KEYBOARD_ARROW_UP_ROUNDED,
+        data="seconds_up",
         icon_size=16,
         padding=-5,
         style=ft.ButtonStyle(            
             color = "#DBE2EF"  ,    #text color
-        )
+        ),
+        on_click=modify_clock
     )
 
 
     down_btn_seconds = ft.IconButton(
         icon=ft.Icons.KEYBOARD_ARROW_DOWN_ROUNDED,
+        data="seconds_down",
         icon_size=16,
         padding=-5,
         style=ft.ButtonStyle(
             color = "#DBE2EF"  ,    #text color
-        )
+        ),
+        on_click=modify_clock
     )
 
 
@@ -253,7 +342,7 @@ def main(page: ft.Page):
         padding=0,
         margin=0,
         content = ft.Column([
-                status_text,
+                status_btn,
                 timer_controls,
                 ft.Container(
                     ft.Row(
