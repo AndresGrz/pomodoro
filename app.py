@@ -6,16 +6,26 @@ import pygame
 
 
 def main(page: ft.Page):
-    pygame.mixer.init()
+    # 1. Assets FIRST (so everything can load from it)
+    page.assets_dir = "assets"
+
+    # 2. Window / app config
     page.title = "Pomodoro"
+    page.window.icon = "assets/icons/yoyo.png"
+
+    # 3. Layout config
     page.padding = 0
     page.spacing = 0
+
+    # 4. Fonts (use paths relative to assets_dir)
     page.fonts = {
-        "Roboto": "assets/fonts/Roboto-Regular.ttf",
-        "Oi": "assets/fonts/Oi-Regular.ttf",
-        "Quantico": "assets/fonts/Quantico-Regular.ttf"
+        "Roboto": "fonts/Roboto-Regular.ttf",
+        "Oi": "fonts/Oi-Regular.ttf",
+        "Quantico": "fonts/Quantico-Regular.ttf"
     }
 
+    # 5. External stuff (not related to Flet rendering)
+    pygame.mixer.init()
 
     # Inicialización de variables para el temporizador
     WORK_TIME = 25 * 60
