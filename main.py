@@ -1,5 +1,3 @@
-from pydoc import text
-
 import flet as ft
 import asyncio
 import pygame
@@ -24,7 +22,7 @@ def main(page: ft.Page):
         "Quantico": "fonts/Quantico-Regular.ttf"
     }
 
-    # 5. External stuff (not related to Flet rendering)
+    # 5. Initiate audio library
     pygame.mixer.init()
 
     # Inicialización de variables para el temporizador
@@ -59,20 +57,17 @@ def main(page: ft.Page):
 
         if is_running:
             return
-        elif not is_running:
-            if e.control.data == "minutes_up":
-                remaining_time += 60
-
-            elif e.control.data == "minutes_down":
-                if remaining_time >= 60:
-                    remaining_time -= 60
-
-            elif e.control.data == "seconds_up":
-                remaining_time += 1
-
-            elif e.control.data == "seconds_down":
-                if remaining_time >= 1:
-                    remaining_time -= 1
+        
+        if e.control.data == "minutes_up":
+            remaining_time += 60
+        elif e.control.data == "minutes_down":
+            if remaining_time >= 60:
+                remaining_time -= 60
+        elif e.control.data == "seconds_up":
+            remaining_time += 1
+        elif e.control.data == "seconds_down":
+            if remaining_time >= 1:
+                remaining_time -= 1
 
         if is_work:
             WORK_TIME = remaining_time
@@ -96,7 +91,6 @@ def main(page: ft.Page):
         if is_work:
             status_btn.content.content.value = "WORK"
             bg.bgcolor = "#112D4E"
-
         else:
             status_btn.content.content.value = "BREAK"
             bg.bgcolor = "#3F72AF"
@@ -125,14 +119,15 @@ def main(page: ft.Page):
 
     # Funcion para el boton de reset
     async def reset_timer(e):
+        nonlocal is_running, remaining_time, is_work, timer_task
+
         play(random_audio("other buttons"))
 
-        nonlocal is_running, remaining_time, is_work, timer_task
-        
         is_running = False
 
         if timer_task:
             timer_task.cancel()
+            timer_task = None
 
         if is_work:
             remaining_time = WORK_TIME
@@ -179,6 +174,7 @@ def main(page: ft.Page):
             is_running = False
             if timer_task:
                 timer_task.cancel()
+                timer_task = None
 
             control_btn.content.value = "Start"
             
@@ -187,7 +183,7 @@ def main(page: ft.Page):
 
     # Función principal del temporizador que se ejecuta en un bucle asincrónico
     async def run_timer():
-        nonlocal remaining_time, is_running, is_work
+        nonlocal remaining_time, is_running, is_work, timer_task
 
         while is_running:
 
@@ -209,6 +205,10 @@ def main(page: ft.Page):
             is_work = not is_work
             remaining_time = WORK_TIME if is_work else BREAK_TIME
             update_ui()
+
+            if is_running:
+                timer_task = asyncio.create_task(run_timer())
+                return
 
 
     # Textos
