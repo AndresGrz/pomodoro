@@ -1,6 +1,13 @@
 import flet as ft
 import asyncio
 import pygame
+import sys
+import os
+
+
+def resource_path(relative_path):
+    base = getattr(sys, '_MEIPASS', os.path.abspath("."))
+    return os.path.join(base, relative_path)
 
 
 def main(page: ft.Page):
@@ -9,7 +16,7 @@ def main(page: ft.Page):
 
     # 2. Window / app config
     page.title = "Pomodoro"
-    page.window.icon = "icons/yoyo.png"
+    page.window.icon = "icons/yoyo.ico"
 
     # 3. Layout config
     page.padding = 0
@@ -39,7 +46,7 @@ def main(page: ft.Page):
         import random
         from pathlib import Path
 
-        audio_folder = Path("assets/audio") / folder
+        audio_folder = Path(resource_path("assets/audio")) / folder
         files = list(audio_folder.glob("*.mp3"))
 
         return str(random.choice(files))
